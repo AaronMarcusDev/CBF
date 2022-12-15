@@ -1,0 +1,65 @@
+// Macros
+macro error {
+    "ERROR: " out puts
+    1 exit
+}
+
+macro EOF {
+    "BFC_EOF_TOKEN"
+}
+
+macro gen {
+    "output.c" fAppend
+}
+
+// Load file
+count
+dup 0 = if {
+    "No arguments provided." error
+} 1 != if {
+    "Too many arguments provided." error
+}
+
+dup fExists false = if {
+    "Input file does not exist." error
+}
+fRead
+
+// Lexer
+// Lexer
+dup trim "" = if {
+    "Input file is empty." error
+}
+
+'' split EOF reverse
+
+// Compiler
+"" "output.c" fWrite
+"#include<stdio.h>\nint main() {\nchar mem[30000] = {0};\n char *ptr = mem;\n" gen
+set start
+dup EOF = if {
+    "return 0;\n}" gen
+    "gcc output.c" system
+    // This command is purely for windows.
+    "cmd.exe /c del output.c" system
+    "Generation finished." puts
+    0 exit
+} dup '>' = if {
+    "++ptr;\n" gen
+} dup '<' = if {
+    "--ptr;\n" gen
+} dup '+' = if {
+    "++(*ptr);\n" gen
+} dup '-' = if {
+    "--(*ptr);\n" gen
+} dup '.' = if {
+    "putchar(*ptr);\n" gen
+} dup ',' = if {
+    "*ptr=getchar();\n" gen
+} dup '[' = if {
+    "while(*ptr){\n" gen
+} dup ']' = if {
+    "}\n" gen
+}
+dump
+jump start
